@@ -1,11 +1,13 @@
 import React from "react";
 import picture from "./facebookIcon.svg";
 import { useMediaQuery } from "../../utils/useMediaQuery";
+import CreateAccount from "../../component/modals/CreateAccount";
 
 function IndexPage() {
   const isTablet = useMediaQuery("(min-width: 767px)");
   return (
     <div className="container" style={{ height: "100vh" }}>
+      <CreateAccount />
       <div
         className={`d-flex justify-content-evenly align-items-center ${
           isTablet ? "" : "flex-column gap-4"
@@ -40,7 +42,7 @@ function IndexPage() {
             <div className="btn btn-primary w-100 lh-lg">Log in</div>
             <p className="mt-2">Forgotten password?</p>
             <div className="border-bottom"></div>
-            <div className="btn btn-success mt-3 lh-lg">Create new account</div>
+            <div className="btn btn-success mt-3 lh-lg" data-bs-toggle="modal" data-bs-target="#createAccountModal">Create new account</div>
           </div>
           <b>Create a Page</b> for a celebrity, brand or business.
         </div>

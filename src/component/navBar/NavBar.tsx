@@ -14,10 +14,10 @@ function NavBar() {
         <div className="d-flex align-items-center">
           <Link
             className="navbar-brand"
-            to="/"
+            to="/home"
             style={{ color: "inherit", padding: "unset" }}
           >
-            <i className="bi bi-facebook fs-1"></i>
+            <i className="bi bi-facebook fs-1" style={{color:"#1B74E4"}}></i>
           </Link>
           {isTablet && (
             <form
