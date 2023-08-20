@@ -4,11 +4,13 @@ import SideBar from '../../component/sideBar/SideBar'
 import Contact from '../../component/contact/Contact'
 import Post from '../../component/post/Post'
 import CreatePost from '../../component/createPost/CreatePost'
+import CreatePostModal from '../../component/modals/CreatePostModal'
 
 function HomePage() {
   return (
     <>
       <NavBar />
+      <CreatePostModal />
       <div className='' style={{height:"100vh"}}>
         <div className='d-flex justify-content-between' style={{position:"relative"}}>
           <div className='' style={{position:"fixed"}} >

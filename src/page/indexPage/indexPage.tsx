@@ -29,7 +29,7 @@ function IndexPage() {
               <input
                 type="text"
                 className="form-control lh-lg"
-                placeholder="Email address or phone number"
+                placeholder="Email address"
               />
             </div>
             <div className="mb-3">
