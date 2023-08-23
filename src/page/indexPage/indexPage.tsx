@@ -1,10 +1,10 @@
-import React from "react";
+import React, { useState } from "react";
 import picture from "./facebookIcon.svg";
 import { useMediaQuery } from "../../utils/useMediaQuery";
 import CreateAccount from "../../component/modals/CreateAccount";
 
 function IndexPage() {
-  const isTablet = useMediaQuery("(min-width: 767px)");
+  const isTablet = useMediaQuery("(min-width: 767px)")
   return (
     <div className="container" style={{ height: "100vh" }}>
       <CreateAccount />
