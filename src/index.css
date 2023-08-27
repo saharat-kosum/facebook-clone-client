@@ -6,7 +6,7 @@
   box-sizing: border-box;
   font-family: 'Rubik', sans-serif;
   list-style-type: none;
-  text-decoration:none;
+  text-decoration:none !important;
 }
 
 .hover-cursor:hover {

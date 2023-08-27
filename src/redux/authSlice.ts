@@ -1,10 +1,10 @@
-import { createSlice } from "@reduxjs/toolkit";
-import { InitialState } from "../type";
+import { PayloadAction, createSlice } from "@reduxjs/toolkit";
+import { InitialState, UserType } from "../type";
 
 const initialState : InitialState = {
   mode : "light",
   user : null,
-  token : null,
+  mockIMG : "https://img.freepik.com/free-vector/illustration-businessman_53876-5856.jpg?w=826&t=st=1693129793~exp=1693130393~hmac=7346bd884e9145dfe06641270fd59554806208016d3acec6f42b5aebba8c28f7"
 }
 
 export const authSlice = createSlice({
@@ -14,13 +14,11 @@ export const authSlice = createSlice({
     setMode: (state) => {
       state.mode = state.mode === "light" ? "dark" : "light"
     },
-    setLogIn: (state, action) => {
-      state.user = action.payload.user
-      state.token = action.payload.token
+    setLogIn: (state, action:PayloadAction<UserType>) => {
+      state.user = action.payload
     },
     setLogOut: (state) => {
       state.user = null
-      state.token = null
     }
   }
 })

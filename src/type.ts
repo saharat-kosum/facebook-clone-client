@@ -1,21 +1,26 @@
 export interface InitialState {
   mode: string;
-  user: string | null;
-  token: string | null;
+  user: UserType | null;
+  mockIMG : string;
 }
 
-export interface User {
+export interface UserType {
+  _id?:string;
   dateOfBirth: string;
   firstName: string;
   lastName: string;
   email: string;
   password: string;
+  occupation: string;
+  location: string;
   picturePath?: string;
   friends?: string[];
-  createDate?: Date;
+  createdAt?: Date;
+  updatedAt?: Date;
 }
 
-export interface Post {
+export interface PostType {
+  _id?:string;
   userId: string;
   firstName: string;
   lastName: string;
@@ -24,5 +29,5 @@ export interface Post {
   picturePath?: string;
   likes?: string[];
   comments?: string[];
-  createDate?: Date;
+  createdAt?: Date;
 }
