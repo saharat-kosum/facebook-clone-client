@@ -15,7 +15,7 @@ function Post(props : PostType) {
     if (props.createdAt) {
       const formattedDate = format(
         new Date(props.createdAt),
-        "dd MMM yyyy"
+        "dd MMM yyyy hh:mm a"
       );
       setCreateDate(formattedDate);
     }

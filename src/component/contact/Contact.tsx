@@ -24,7 +24,13 @@ function Contact() {
         </div>
         <ul className="" style={{ padding: "unset", width: "270px" }}>
           <li className="rounded p-2 sidebar-hover-color w-100 text-start lh-base">
-            Profile
+            <i className="pe-2 fs-5 bi bi-people-fill"></i>Friends
+          </li>
+          <li className="rounded p-2 sidebar-hover-color w-100 text-start lh-base">
+            <i className="pe-2 fs-5 bi bi-people-fill"></i>Friends
+          </li>
+          <li className="rounded p-2 sidebar-hover-color w-100 text-start lh-base">
+            <i className="pe-2 fs-5 bi bi-people-fill"></i>Friends
           </li>
           <li className="rounded p-2 sidebar-hover-color w-100 text-start lh-base">
             <i className="pe-2 fs-5 bi bi-people-fill"></i>Friends

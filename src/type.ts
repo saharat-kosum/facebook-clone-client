@@ -31,3 +31,8 @@ export interface PostType {
   comments?: string[];
   createdAt?: Date;
 }
+
+export interface PostPayload {
+  userId?: string;
+  description?: string;
+}

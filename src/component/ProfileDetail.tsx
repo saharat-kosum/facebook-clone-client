@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { useAppSelector } from "../redux/Store";
 import { format } from "date-fns";
 import { UserType } from "../type";
