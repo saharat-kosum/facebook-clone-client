@@ -4,7 +4,12 @@ import { useAppSelector } from "../../redux/Store";
 import { format } from "date-fns";
 import { useNavigate } from "react-router-dom";
 
-function Post(props : PostType) {
+interface PostProps {
+  props : PostType
+  deletePost : ( postId : string) => void;
+}
+
+function Post({props, deletePost} : PostProps) {
   const profilePicture = useAppSelector((state) => state.auth.mockIMG);
   const prefix_img_url = process.env.REACT_APP_PREFIX_URL_IMG;
   const [createDate, setCreateDate] = useState("");
@@ -59,7 +64,12 @@ function Post(props : PostType) {
           </div>
           <div className="d-flex">
             <i className="bi bi-three-dots ms-1 create-hover-color rounded-circle p-2" style={{height:"fit-content"}}></i>
-            <i className="bi bi-x-lg create-hover-color rounded-circle p-2" style={{height:"fit-content"}}></i>
+            <i onClick={()=>{
+              if(props._id){
+                deletePost(props._id)
+              }
+            }
+            } className="bi bi-x-lg create-hover-color rounded-circle p-2" style={{height:"fit-content"}}></i>
           </div>
         </div>
       </div>

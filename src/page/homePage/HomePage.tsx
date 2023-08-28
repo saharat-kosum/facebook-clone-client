@@ -79,6 +79,31 @@ function HomePage() {
     }
   };
 
+  const deletePost = async (id : string) => {
+    const token = getUserToken()
+    setProcessing(true);
+    try {
+      const response = await axios.delete(`${prefixURL}/posts/delete/${id}`,{
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+      if(response.status === 200){
+        const data = response.data;
+        const sortData = sortPost(data)
+        setPosts(sortData);
+      }else if(response.status === 404){
+        alert("Post not found")
+      }else{
+        alert("Delete post failed")
+      }
+    } catch (error) {
+      console.error(error)  
+    } finally {
+      setProcessing(false);
+    }
+  }
+
   const sortPost = (posts: PostType[]): PostType[] => {
     return posts.slice().sort((a, b) => {
       if (a.createdAt === undefined && b.createdAt === undefined) {
@@ -130,16 +155,8 @@ function HomePage() {
                 posts.map((post) => (
                   <Post
                     key={post._id}
-                    _id={post._id}
-                    userId={post.userId}
-                    firstName={post.firstName}
-                    lastName={post.lastName}
-                    description={post.description}
-                    userPicturePath={post.userPicturePath}
-                    picturePath={post.picturePath}
-                    likes={post.likes}
-                    comments={post.comments}
-                    createdAt={post.createdAt}
+                    props={post}
+                    deletePost={deletePost}
                   />
                 ))
               ) : (
