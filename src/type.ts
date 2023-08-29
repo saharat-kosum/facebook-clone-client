@@ -28,11 +28,18 @@ export interface PostType {
   userPicturePath?: string;
   picturePath?: string;
   likes?: string[];
-  comments?: string[];
+  comments?: CommentType[];
   createdAt?: Date;
 }
 
 export interface PostPayload {
   userId?: string;
   description?: string;
+}
+
+export interface CommentType {
+  firstName: string;
+  lastName: string;
+  userPicturePath?: string;
+  description: string;
 }

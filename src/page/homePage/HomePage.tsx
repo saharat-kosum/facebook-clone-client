@@ -8,7 +8,7 @@ import CreatePostModal from "../../component/modals/CreatePostModal";
 import { useMediaQuery } from "../../utils/useMediaQuery";
 import { AppDispatch, useAppSelector } from "../../redux/Store";
 import axios from "axios";
-import { PostType } from "../../type";
+import { CommentType, PostType } from "../../type";
 import Loading from "../../component/Loading";
 import { setLogIn } from "../../redux/authSlice";
 import { useDispatch } from "react-redux";
@@ -18,6 +18,7 @@ function HomePage() {
   const isLaptop = useMediaQuery("(min-width: 1070px)");
   const prefixURL = process.env.REACT_APP_PREFIX_URL;
   const [authToken, setAuthToken] = useState<string | undefined>(undefined);
+  const [comment, setComment] = useState<string>('');
   const userData = useAppSelector((state) => state.auth.user);
   const [posts, setPosts] = useState<PostType[] | undefined>(undefined);
   const [processing, setProcessing] = useState(false);
@@ -79,28 +80,93 @@ function HomePage() {
     }
   };
 
-  const deletePost = async (id : string) => {
+  const likePost =async (id:string) => {
     const token = getUserToken()
     setProcessing(true);
     try {
-      const response = await axios.delete(`${prefixURL}/posts/delete/${id}`,{
+      const response = await axios.put(`${prefixURL}/posts/${id}/like`,
+      {userId : userData?._id},
+      {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       })
-      if(response.status === 200){
-        const data = response.data;
-        const sortData = sortPost(data)
-        setPosts(sortData);
-      }else if(response.status === 404){
-        alert("Post not found")
-      }else{
-        alert("Delete post failed")
-      }
+      const data : PostType = response.data
+      const updatedPosts = posts?.map(post => {
+        if (post._id === data._id) {
+          return data;
+        }
+        return post;
+      });
+      setPosts(updatedPosts)
     } catch (error) {
-      console.error(error)  
+      console.error(error) 
     } finally {
       setProcessing(false);
+    }
+  }
+
+  const commentPost =async (id:string) => {
+    const token = getUserToken()
+    setProcessing(true);
+    if(!userData){
+      return
+    }
+    const newComment : CommentType = {
+      firstName: userData.firstName,
+      lastName: userData.lastName,
+      userPicturePath: userData.picturePath,
+      description: comment,
+    }
+    try {
+      const response = await axios.post(`${prefixURL}/posts/add/comment/${id}`,
+      newComment,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+      const data : PostType = response.data
+      const updatedPosts = posts?.map(post => {
+        if (post._id === data._id) {
+          return data;
+        }
+        return post;
+      });
+      setComment('')
+      setPosts(updatedPosts)
+    } catch (error) {
+      console.error(error) 
+    } finally {
+      setProcessing(false);
+    }
+  }
+
+  const deletePost = async (id : string) => {
+    const result = window.confirm("Are you sure you want to delete this post?");
+    if(result){
+      const token = getUserToken()
+      setProcessing(true);
+      try {
+        const response = await axios.delete(`${prefixURL}/posts/delete/${id}`,{
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        })
+        if(response.status === 200){
+          const data = response.data;
+          const sortData = sortPost(data)
+          setPosts(sortData);
+        }else if(response.status === 404){
+          alert("Post not found")
+        }else{
+          alert("Delete post failed")
+        }
+      } catch (error) {
+        console.error(error)  
+      } finally {
+        setProcessing(false);
+      }
     }
   }
 
@@ -157,6 +223,10 @@ function HomePage() {
                     key={post._id}
                     props={post}
                     deletePost={deletePost}
+                    likePost={likePost}
+                    commentPost={commentPost}
+                    comment={comment}
+                    setComment={setComment}
                   />
                 ))
               ) : (
