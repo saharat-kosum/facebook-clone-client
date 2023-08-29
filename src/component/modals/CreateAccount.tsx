@@ -2,16 +2,29 @@ import React, { useEffect, useState } from "react";
 import { parseISO, format } from "date-fns";
 import axios from "axios";
 import FileDropzone from "../DropZone";
+import { UserType } from "../../type";
 
-const defaultUserData = {
+const defaultUserData: UserType = {
   dateOfBirth: "",
   firstName: "",
   lastName: "",
   email: "",
   password: "",
+  location: "",
+  occupation: "",
 };
 
-function CreateAccount() {
+interface CreateAccountProps {
+  setIsProcessing: (processing: boolean) => void;
+  setShowAlert: (showAlert: boolean) => void;
+  setIsSuccess: (success: boolean) => void;
+}
+
+function CreateAccount({
+  setIsProcessing,
+  setShowAlert,
+  setIsSuccess,
+}: CreateAccountProps) {
   const prefixURL = process.env.REACT_APP_PREFIX_URL;
   const [dateOfBirth, setDateOfBirth] = useState("");
   const [imageFile, setImageFile] = useState<File | null>(null);
@@ -48,31 +61,43 @@ function CreateAccount() {
   };
 
   const handleFileAdded = (files: File[]) => {
-    // Update the uploadedFiles state with the dropped files
     setImageFile(files[0]);
   };
 
   const signUpHandle = async (event: React.FormEvent<HTMLFormElement>) => {
+    setIsProcessing(true);
+    setIsSuccess(false);
     event.preventDefault();
     const form = event.currentTarget;
     if (form.checkValidity()) {
-      // Your form is valid, perform further actions
       const formData = new FormData();
       if (imageFile) {
-        formData.append("image", imageFile);
+        formData.append("file", imageFile);
       }
       formData.append("userData", JSON.stringify(userData));
       try {
-        // const response = await axios.post(`${prefixURL}/auth/register`)
-        // if(response.status == 200){
-        //   handleReset()
-        // }
-        console.log(formData);
+        const response = await axios.post(
+          `${prefixURL}/auth/register`,
+          formData,
+          {
+            headers: {
+              "Content-Type": "multipart/form-data",
+            },
+          }
+        );
+        if (response.status === 200) {
+          handleReset();
+          setIsSuccess(true);
+        }
       } catch (err) {
         console.error(err);
+      } finally {
+        setShowAlert(true);
+        setIsProcessing(false);
       }
     } else {
       form.classList.add("was-validated");
+      setIsProcessing(false);
     }
   };
 
@@ -96,7 +121,7 @@ function CreateAccount() {
         aria-labelledby="createAccountModalLabel"
         aria-hidden="true"
       >
-        <div className="modal-dialog modal-dialog-centered">
+        <div className="modal-dialog modal-dialog-scrollable">
           <form
             className="needs-validation"
             noValidate
@@ -183,6 +208,34 @@ function CreateAccount() {
                   />
                   <div className="invalid-feedback">
                     Date of birth is required.
+                  </div>
+                  <div className="d-flex gap-2 mt-3">
+                    <input
+                      type="text"
+                      className="form-control"
+                      id="exampleInputLocation"
+                      placeholder="Location"
+                      name="location"
+                      value={userData.location}
+                      onChange={(e) => handleChange(e)}
+                      required
+                    />
+                    <div className="invalid-feedback">
+                      Location is required.
+                    </div>
+                    <input
+                      type="text"
+                      className="form-control"
+                      id="exampleInputOccupation"
+                      placeholder="Occupation"
+                      name="occupation"
+                      value={userData.occupation}
+                      onChange={(e) => handleChange(e)}
+                      required
+                    />
+                    <div className="invalid-feedback">
+                      Occupation is required.
+                    </div>
                   </div>
                   {imageFile ? (
                     <div className="position-relative">
