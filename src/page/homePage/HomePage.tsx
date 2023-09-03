@@ -154,9 +154,11 @@ function HomePage() {
           },
         })
         if(response.status === 200){
-          const data = response.data;
-          const sortData = sortPost(data)
-          setPosts(sortData);
+          const filter = posts?.filter((post)=>post._id !== id)
+          if(filter){
+            const sortData = sortPost(filter)
+            setPosts(sortData);
+          }
         }else if(response.status === 404){
           alert("Post not found")
         }else{
@@ -199,6 +201,7 @@ function HomePage() {
           setPosts={setPosts}
           setProcessing={setProcessing}
           sortPost={sortPost}
+          posts={posts}
         />
         <div className="pb-3" style={{ minHeight: "94vh" }}>
           <div
@@ -247,7 +250,10 @@ function HomePage() {
                 display: contactHandle ? "inherit" : "none",
               }}
             >
-              <Contact />
+              <Contact 
+                setProcessing={setProcessing}
+                token={getUserToken()}
+              />
             </div>
           </div>
         </div>

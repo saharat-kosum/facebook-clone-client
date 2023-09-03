@@ -44,6 +44,7 @@ function Post({
       const like = props.likes.includes(userData._id);
       setIsLike(like);
     }
+    // eslint-disable-next-line
   }, [props]);
 
   const userNavigator = (id: string) => {
@@ -183,7 +184,7 @@ function Post({
       </div>
       {props.comments &&
         props.comments.length > 0 &&
-        props.comments.map((comment) => <CommentComponent comment={comment} />)}
+        props.comments.map((comment,index) => <CommentComponent key={index} comment={comment} />)}
     </div>
   );
 }
