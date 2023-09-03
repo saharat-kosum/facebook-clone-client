@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useAppSelector } from "../../redux/Store";
 import axios from "axios";
 import { UserType } from "../../type";
+import { useNavigate } from "react-router-dom";
 
 interface ContactProps {
   setProcessing: (processing: boolean) => void;
@@ -15,6 +16,7 @@ function Contact({ setProcessing, token }: ContactProps) {
   const [friends, setFriends] = useState<UserType[] | undefined>(undefined);
   const prefix_img_url = process.env.REACT_APP_PREFIX_URL_IMG;
   const profilePicture = useAppSelector((state) => state.auth.mockIMG);
+  const navigate = useNavigate();
 
   useEffect(() => {
     getSuggest();
@@ -25,6 +27,10 @@ function Contact({ setProcessing, token }: ContactProps) {
     getFriends();
     // eslint-disable-next-line
   }, [userData]);
+
+  const navigateProfile = (id : string) => {
+    navigate(`/profile/${id}`);
+  };
 
   const getSuggest = async () => {
     try {
@@ -133,7 +139,11 @@ function Contact({ setProcessing, token }: ContactProps) {
           {suggestUser &&
             suggestUser.map((user,index) => (
               <li key={index} className="p-1 w-100 text-start lh-base d-flex justify-content-between">
-                <div className="text-capitalize">
+                <div className="text-capitalize hover-cursor" onClick={()=>{
+                  if(user._id){
+                    navigateProfile(user._id)
+                  }
+                }}>
                   <img
                     alt="profile"
                     className="rounded-circle border me-2"
@@ -171,7 +181,11 @@ function Contact({ setProcessing, token }: ContactProps) {
           {friends &&
             friends.map((friend,index) => (
               <li key={index} className="p-1 w-100 text-start lh-base d-flex justify-content-between ">
-                <div className="text-capitalize">
+                <div className="text-capitalize hover-cursor" onClick={()=>{
+                  if(friend._id){
+                    navigateProfile(friend._id)
+                  }
+                }}>
                   <img
                     alt="profile"
                     className="rounded-circle border me-2"

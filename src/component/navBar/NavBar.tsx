@@ -56,7 +56,7 @@ function NavBar() {
           style={{ marginBottom: "unset" }}
         >
           <li>
-            <i className="bi bi-moon-fill p-2 bg-secondary-subtle rounded-circle hover-cursor"></i>
+            <i className="bi bi-list p-2 bg-secondary-subtle rounded-circle hover-cursor"></i>
           </li>
           <li>
             <i className="bi bi-chat-dots-fill p-2 bg-secondary-subtle rounded-circle hover-cursor"></i>

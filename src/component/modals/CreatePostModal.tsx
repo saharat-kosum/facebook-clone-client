@@ -6,12 +6,13 @@ import axios from "axios";
 
 interface PostModalProps {
   token : string | undefined;
+  posts : PostType[] | undefined;
   setPosts: (posts: PostType[]) => void;
   setProcessing: (processing: boolean) => void;
   sortPost: (post: PostType[]) => PostType[] ;
 }
 
-function CreatePostModal({token, setPosts, setProcessing, sortPost} : PostModalProps) {
+function CreatePostModal({token, posts, setPosts, setProcessing, sortPost} : PostModalProps) {
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const [uploadedFileURL, setUploadedFileURL] = useState<string>("");
   const [description, setDescription] = useState<string>("");
@@ -53,9 +54,12 @@ function CreatePostModal({token, setPosts, setProcessing, sortPost} : PostModalP
           "Authorization": `Bearer ${token}`
         },
       });
-      const data = response.data;
-      const sortData = sortPost(data)
-      setPosts(sortData);
+      const data : PostType = response.data;
+      if(posts){
+        const newPost = posts.concat(data)
+        const sortData = sortPost(newPost)
+        setPosts(sortData);
+      }
     } catch (error) {
       console.error("Error create post", error);
     } finally {
