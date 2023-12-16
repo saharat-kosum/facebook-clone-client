@@ -15,6 +15,24 @@ function ProfileDetail(props : UserType) {
     return formattedDate
   }
 
+  const convertTimestampToDate = (timestamp: string): string => {
+    const timestampInt = parseInt(timestamp)
+    const dateRegex = /^(0[1-9]|[12][0-9]|3[01])\s(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\s\d{4}$/;
+    if (dateRegex.test(timestamp)) {
+      return timestamp
+    }
+    const months = [
+      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+    ];
+    const date = new Date(timestampInt * 1000);
+    const day = date.getDate().toString().padStart(2, '0');
+    const month = months[date.getMonth()];
+    const year = date.getFullYear();
+
+  return `${day} ${month} ${year}`;
+  };
+
   return (
     <div
       className="rounded-3 border bg-white shadow-sm mt-3 p-3 position-relative"
@@ -55,7 +73,7 @@ function ProfileDetail(props : UserType) {
       </p>
       <p>
         <i className="bi bi-calendar-week me-2"></i>
-        {props.dateOfBirth}
+        {props.dateOfBirth ? convertTimestampToDate(props.dateOfBirth) : null}
       </p>
       <div className="btn btn-secondary w-100 me-2">Edit Profile</div>
     </div>

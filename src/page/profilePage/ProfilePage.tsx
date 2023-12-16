@@ -203,7 +203,7 @@ function ProfilePage() {
   
   return (
     <>
-      <NavBar />
+      <NavBar token={authToken} />
       <Loading isShow={processing} />
       <div className='container' style={{minHeight:"94vh"}}>
         <div className={`${isLaptop? "d-flex" : ""} pb-3 gap-3`}>

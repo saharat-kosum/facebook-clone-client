@@ -1,14 +1,22 @@
-import React from "react";
+import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useMediaQuery } from "../../utils/useMediaQuery";
 import { useAppSelector } from "../../redux/Store";
+import { UserType } from "../../type";
+import axios from "axios";
 
-function NavBar() {
+interface NavbarProps {
+  token: string | undefined;
+}
+
+function NavBar({token} : NavbarProps) {
   const isTablet = useMediaQuery("(min-width: 570px)");
   const userData = useAppSelector((state) => state.auth.user);
   const prefix_img_url = process.env.REACT_APP_PREFIX_URL_IMG;
   const profilePicture = useAppSelector((state) => state.auth.mockIMG);
+  const prefixURL = process.env.REACT_APP_PREFIX_URL;
   const navigate = useNavigate();
+  const [searchUser,setSearchUser] = useState<UserType[] | undefined>(undefined);
 
   const logOutHandle = () => {
     sessionStorage.removeItem("userToken");
@@ -17,6 +25,31 @@ function NavBar() {
 
   const profile = () => {
     navigate(`/profile/${userData?._id}`);
+  };
+
+  const searchHandle = async (event : React.ChangeEvent<HTMLInputElement>) => {
+    if (event.target.value) {
+      try {
+        const response = await axios.get(
+          `${prefixURL}/users/search?search=${event.target.value}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+        const data = response.data;
+        setSearchUser(data.users)
+      } catch (err) {
+        console.error(err);
+      }
+    } else {
+      setSearchUser(undefined)
+    }
+  };
+
+  const clearUsers = () => {
+    setSearchUser(undefined)
   };
 
   return (
@@ -35,19 +68,46 @@ function NavBar() {
           </Link>
           {isTablet && (
             <form
-              className="d-flex rounded-pill border ps-1"
+              className="d-flex rounded-pill border ps-1 position-relative"
               style={{ height: "fit-content" }}
             >
               <input
-                className="form-control rounded-pill"
+                className="form-control rounded-pill ps-5"
                 type="search"
-                placeholder="Search"
+                placeholder="Search ..."
                 aria-label="Search"
                 style={{ border: "none" }}
+                onChange={(e) => searchHandle(e)}
+                onBlur={()=>clearUsers()}
               />
-              <button className="btn" type="submit">
+              <button className="btn position-absolute" type="submit">
                 <i className="bi bi-search"></i>
               </button>
+              {searchUser && searchUser.length >0 ? 
+                <ul className="dropdown-menu d-block w-100" style={{ top: "38px" }}
+                  onMouseDown={(event: React.MouseEvent) => {
+                    event.preventDefault();
+                  }}
+                >
+                {searchUser.map((user) =>
+                  <li>
+                    <a className="dropdown-item" href={`/profile/${user._id}`}>
+                      <img
+                        alt="profile"
+                        className="rounded-circle border me-2"
+                        src={
+                          user?.picturePath
+                            ? prefix_img_url + user?.picturePath
+                            : profilePicture
+                        }
+                        style={{ width: "36px", height: "36px", objectFit: "cover" }}
+                      />
+                      {user.firstName} {user.lastName}
+                    </a>
+                  </li>
+                )}
+              </ul>
+              : null}
             </form>
           )}
         </div>

@@ -193,7 +193,7 @@ function HomePage() {
 
   return (
     <>
-      <NavBar />
+      <NavBar token={authToken} />
       <Loading isShow={processing} />
       <div className="px-2">
         <CreatePostModal
