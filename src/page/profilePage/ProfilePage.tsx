@@ -132,7 +132,7 @@ function ProfilePage() {
     }
   }
 
-  const commentPost =async (id:string) => {
+  const commentPost =async (id:string, commentProp : string) => {
     const token = getUserToken()
     setProcessing(true);
     if(!userData){
@@ -142,7 +142,7 @@ function ProfilePage() {
       firstName: userData.firstName,
       lastName: userData.lastName,
       userPicturePath: userData.picturePath,
-      description: comment,
+      description: commentProp,
     }
     try {
       const response = await axios.post(`${prefixURL}/posts/add/comment/${id}`,

@@ -10,7 +10,7 @@ interface PostProps {
   comment: string;
   deletePost: (postId: string) => void;
   likePost: (postId: string) => void;
-  commentPost: (postId: string) => void;
+  commentPost: (postId: string, comment: string) => void;
   setComment: (comment: string) => void;
 }
 
@@ -25,6 +25,7 @@ function Post({
   const profilePicture = useAppSelector((state) => state.auth.mockIMG);
   const prefix_img_url = process.env.REACT_APP_PREFIX_URL_IMG;
   const [createDate, setCreateDate] = useState("");
+  const [commentInPost, setCommentInPost] = useState<string>('');
   const [isLike, setIsLike] = useState(false);
   const userData = useAppSelector((state) => state.auth.user);
   const navigate = useNavigate();
@@ -170,14 +171,15 @@ function Post({
           className="form-control rounded-pill"
           type="text"
           placeholder="Write a comment..."
-          value={comment}
-          onChange={(e) => setComment(e.target.value)}
+          value={commentInPost}
+          onChange={(e) => setCommentInPost(e.target.value)}
         />
         <i
           className="bi bi-send-fill create-hover-color rounded-circle p-2"
           onClick={() => {
             if (props._id) {
-              commentPost(props._id);
+              commentPost(props._id, commentInPost);
+              setCommentInPost('')
             }
           }}
         ></i>
