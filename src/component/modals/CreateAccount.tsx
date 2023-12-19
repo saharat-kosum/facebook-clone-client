@@ -173,7 +173,7 @@ function CreateAccount({
                     </div>
                   </div>
                   <input
-                    type="text"
+                    type="email"
                     className="form-control mt-3"
                     id="exampleInputemail1"
                     placeholder="E-mail"
