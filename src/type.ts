@@ -43,3 +43,13 @@ export interface CommentType {
   userPicturePath?: string;
   description: string;
 }
+
+export interface ChatHistory {
+  sender: string;
+  message: string;
+}
+
+export interface WsMessagePayload {
+  targetUser: string;
+  message: string;
+}

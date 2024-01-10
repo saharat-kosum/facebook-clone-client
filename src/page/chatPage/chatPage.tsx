@@ -6,7 +6,8 @@ import axios from 'axios';
 import { useParams } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { setLogIn } from '../../redux/authSlice';
-import { UserType } from '../../type';
+import { ChatHistory, UserType, WsMessagePayload } from '../../type';
+import { useMediaQuery } from '../../utils/useMediaQuery';
 
 function ChatPage() {
   const [authToken, setAuthToken] = useState<string | undefined>(undefined)
@@ -19,7 +20,13 @@ function ChatPage() {
   const params = useParams()
   const [ws,setWs] = useState<null | WebSocket>(null)
   const [message, setMessage] = useState<string>('')
-  const [receivedMessage, setReceivedMessage] = useState<string>('')
+  const [targetUser, setTargetUser] = useState<UserType | undefined>(undefined)
+  const [chatHistory, setChatHistory] = useState<ChatHistory[]>([])
+  const prefix_img_url = process.env.REACT_APP_PREFIX_URL_IMG;
+  const profilePicture = useAppSelector((state) => state.auth.mockIMG);
+  const isLaptop = useMediaQuery("(min-width: 1024px)");
+  const isMobile = useMediaQuery("(min-width: 425px)");
+  const isTablet = useMediaQuery("(min-width: 768px)");
 
   useEffect(()=> {
     const token = getUserToken();
@@ -37,8 +44,12 @@ function ChatPage() {
     if (prefixWS && authToken) {
       const ws = new WebSocket(`${prefixWS}/?token=${authToken}`)
       setWs(ws)
-      ws.addEventListener('message', (event) => {
-        setReceivedMessage(event.data)
+      ws.addEventListener('message', (data) => {
+        console.log(data)
+        // setChatHistory((prevHistory) => [
+        //   ...prevHistory,
+        //   { sender: data.sender, message: data.message },
+        // ]);
       })
 
       return () => {
@@ -99,8 +110,13 @@ function ChatPage() {
   };
 
   const sendMessage = () => {
-    if (ws) {
-      ws.send(message)
+    if (ws && targetUser && message && targetUser._id) {
+      const wsPayload : WsMessagePayload = {
+        targetUser: targetUser._id,
+        message: message
+      }
+      ws.send(JSON.stringify(wsPayload))
+      setMessage('')
     }
   }
 
@@ -109,17 +125,68 @@ function ChatPage() {
       <NavBar token={authToken} />
       <Loading isShow={processing} />
       <div className='d-flex bg-white' style={{ minHeight: "94vh" }}>
-        <div className='w-25 border-end p-3'>
-          <div className='d-flex justify-content-between align-items-center mb-3'>
-            <h2>Chats</h2>
-            <div>Icon</div>
+        <div className='w-25 border-end'>
+          <div className='d-flex justify-content-between align-items-center p-2 p-sm-3'>
+            {isMobile ? 
+              <h2>Chats</h2> : <h5>Chats</h5>
+            }
+            {isLaptop ? 
+            <div className='d-flex gap-3'>
+              <div className='p-2 fs-5 fw-bold rounded-circle hover-cursor' style={{ backgroundColor: "#F0F2F5" }}>
+                <i className="bi bi-three-dots"></i>
+              </div>
+              <div className='p-2 fs-5 fw-bold rounded-circle hover-cursor' style={{ backgroundColor: "#F0F2F5" }}>
+                <i className="bi bi-pencil-square"></i>
+              </div>
+            </div>
+            : <></>}
           </div>
-          <div>Map friends</div>
+          <form
+            className="d-flex rounded-pill border mb-2 position-relative mx-3"
+            style={{ height: "fit-content" }}
+          >
+            <input
+              className="form-control rounded-pill ps-sm-5"
+              type="search"
+              placeholder={isTablet ? "Search Messenger" : ""}
+              aria-label="Search"
+              style={{ border: "none", backgroundColor: "#F0F2F5" }}
+            />
+            <button className="btn position-absolute" type="submit">
+              <i className="bi bi-search"></i>
+            </button>
+          </form>
+          <div className='px-sm-2'>
+            {friends?.map((friend, index) =>
+              <div className='p-2 sidebar-hover-color rounded-3 text-center d-md-flex gap-3 align-items-center' key={index} 
+                style={{ backgroundColor: targetUser?._id === friend._id ? "#E4E6EB" : "" }}
+                onClick={()=>setTargetUser(friend)}
+              >
+                <img
+                  alt="profile"
+                  className="rounded-circle border"
+                  src={
+                    friend?.picturePath
+                      ? prefix_img_url + friend?.picturePath
+                      : profilePicture
+                  }
+                  style={{ width: "56px", height: "56px", objectFit: "cover" }}
+                />
+                {isTablet &&
+                  <span className=''>
+                    {friend.firstName} {friend.lastName}
+                  </span>
+                }
+              </div>
+            )}
+          </div>
         </div>
         <div className='w-75 d-flex flex-column p-3'>
           <div className='flex-grow-1'>Message to Someone</div>
           <div className='d-flex gap-2'>
-            <input type="text" placeholder='Type your message here' className='form-control' />
+            <input type="text" placeholder='Type your message here' className='form-control'
+              onChange={(e)=>setMessage(e.target.value)} value={message}
+            />
             <button type="button" className="p-2 btn btn-outline-primary">Send</button>
           </div>
         </div>
