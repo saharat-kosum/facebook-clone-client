@@ -44,12 +44,12 @@ function ChatPage() {
     if (prefixWS && authToken) {
       const ws = new WebSocket(`${prefixWS}/?token=${authToken}`)
       setWs(ws)
-      ws.addEventListener('message', (data) => {
-        console.log(data)
-        // setChatHistory((prevHistory) => [
-        //   ...prevHistory,
-        //   { sender: data.sender, message: data.message },
-        // ]);
+      ws.addEventListener('message', (event) => {
+        const data = JSON.parse(event.data)
+        setChatHistory((prev) => [
+          ...prev,
+          { sender: data.sender, message: data.message },
+        ]);
       })
 
       return () => {
@@ -109,13 +109,22 @@ function ChatPage() {
     }
   };
 
-  const sendMessage = () => {
-    if (ws && targetUser && message && targetUser._id) {
+  const sendMessage = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
+    if (ws && targetUser && message && targetUser._id && userData && userData._id) {
       const wsPayload : WsMessagePayload = {
         targetUser: targetUser._id,
         message: message
       }
       ws.send(JSON.stringify(wsPayload))
+      const newChat : ChatHistory = {
+        sender: userData._id,
+        message: message
+      }
+      setChatHistory((prev) => [
+        ...prev,
+        newChat
+      ])
       setMessage('')
     }
   }
@@ -181,15 +190,55 @@ function ChatPage() {
             )}
           </div>
         </div>
-        <div className='w-75 d-flex flex-column p-3'>
-          <div className='flex-grow-1'>Message to Someone</div>
-          <div className='d-flex gap-2'>
-            <input type="text" placeholder='Type your message here' className='form-control'
-              onChange={(e)=>setMessage(e.target.value)} value={message}
-            />
-            <button type="button" className="p-2 btn btn-outline-primary">Send</button>
+        {targetUser && userData ?
+          <div className='w-75 d-flex flex-column'>
+            <div className='flex-grow-1 d-flex flex-column'>
+              <div className='shadow-sm p-3 d-flex justify-content-between align-items-center'>
+                <div className=''>
+                  <img
+                    alt="profile"
+                    className="rounded-circle border me-2"
+                    src={
+                      targetUser.picturePath
+                        ? prefix_img_url + targetUser.picturePath
+                        : profilePicture
+                    }
+                    style={{ width: "40px", height: "40px", objectFit: "cover" }}
+                  />
+                  {isMobile &&
+                    <span className=''>
+                      {targetUser.firstName} {targetUser.lastName}
+                    </span>
+                  }
+                </div>
+                <div className='d-flex fs-5' style={{color:"#007DF2"}}>
+                  <i className="bi bi-telephone-fill p-2 hover-cursor"></i>
+                  <i className="bi bi-camera-video-fill p-2 mx-1 hover-cursor"></i>
+                  <i className="bi bi-info-circle-fill p-2 hover-cursor"></i>
+                </div>
+              </div>
+              <div className='p-3 flex-grow-1 d-flex flex-column justify-content-end'>
+                {chatHistory.map((chat, index) => (
+                  <div className={`${chat.sender === userData._id ? 'align-self-end bg-primary' : 'bg-secondary'} 
+                    mt-1 py-1 px-3 rounded-pill text-white`}
+                    style={{width:"fit-content"}}
+                    key={index}>{chat.message}
+                  </div>
+                ))}
+              </div>
+            </div>
+            <form className='d-flex gap-2 mx-3 mb-3' onSubmit={(event)=>sendMessage(event)}>
+              <input type="text" placeholder='Type your message here' className='form-control'
+                onChange={(e)=>setMessage(e.target.value)} value={message}
+              />
+              <button type="submit" className="p-2 btn btn-outline-primary">Send</button>
+            </form>
           </div>
-        </div>
+          :
+          <div className='w-75 d-flex justify-content-center align-items-center text-secondary'>
+            <p>Please select friend to start chat</p>
+          </div>
+        }
       </div>
     </>
   )

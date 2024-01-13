@@ -13,7 +13,7 @@ function App() {
           <Route path="/" element={<IndexPage />} />
           <Route path="/home" element={<HomePage />} />
           <Route path="/profile/:userId" element={<ProfilePage/>} />
-          <Route path="/chat/:userId" element={<ChatPage/>} />
+          <Route path="/chat" element={<ChatPage/>} />
         </Routes>
       </BrowserRouter>
     </div>
