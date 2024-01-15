@@ -6,7 +6,7 @@ import axios from 'axios';
 import { useParams } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { setLogIn } from '../../redux/authSlice';
-import { ChatHistory, UserType, WsMessagePayload } from '../../type';
+import { ChatHistory, UserType } from '../../type';
 import { useMediaQuery } from '../../utils/useMediaQuery';
 
 function ChatPage() {
@@ -14,6 +14,7 @@ function ChatPage() {
   const [friends, setFriends] = useState<UserType[] | undefined>(undefined);
   const userData = useAppSelector((state) => state.auth.user);
   const [processing, setProcessing] = useState(false);
+  const [isLoadingChat, setIsLoadingChat] = useState(false);
   const prefixURL = process.env.REACT_APP_PREFIX_URL;
   const prefixWS = process.env.REACT_APP_PREFIX_WS;
   const dispatch = useDispatch<AppDispatch>();
@@ -48,7 +49,7 @@ function ChatPage() {
         const data = JSON.parse(event.data)
         setChatHistory((prev) => [
           ...prev,
-          { sender: data.sender, message: data.message },
+          { sender: data.sender, message: data.message, receiver: data.receiver },
         ]);
       })
 
@@ -109,18 +110,38 @@ function ChatPage() {
     }
   };
 
+  const onClickFriendHandle = async (friend : UserType) => {
+    setTargetUser(friend)
+    setIsLoadingChat(true)
+    try {
+      const response = await axios.get(
+          `${prefixURL}/chats/${friend._id}`,
+          {
+            headers: {
+              Authorization: `Bearer ${authToken}`,
+            },
+          }
+      );
+      
+      const data = response.data
+      setChatHistory(data)
+    } catch (error) {
+      console.error(error);
+    }
+    finally {
+      setIsLoadingChat(false)
+    }
+  }
+
   const sendMessage = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
-    if (ws && targetUser && message && targetUser._id && userData && userData._id) {
-      const wsPayload : WsMessagePayload = {
-        targetUser: targetUser._id,
-        message: message
-      }
-      ws.send(JSON.stringify(wsPayload))
+    if (ws && targetUser && message.trim() && targetUser._id && userData && userData._id) {
       const newChat : ChatHistory = {
         sender: userData._id,
+        receiver: targetUser._id,
         message: message
       }
+      ws.send(JSON.stringify(newChat))
       setChatHistory((prev) => [
         ...prev,
         newChat
@@ -169,7 +190,7 @@ function ChatPage() {
             {friends?.map((friend, index) =>
               <div className='p-2 sidebar-hover-color rounded-3 text-center d-md-flex gap-3 align-items-center' key={index} 
                 style={{ backgroundColor: targetUser?._id === friend._id ? "#E4E6EB" : "" }}
-                onClick={()=>setTargetUser(friend)}
+                onClick={()=>onClickFriendHandle(friend)}
               >
                 <img
                   alt="profile"
@@ -217,12 +238,13 @@ function ChatPage() {
                   <i className="bi bi-info-circle-fill p-2 hover-cursor"></i>
                 </div>
               </div>
-              <div className='p-3 flex-grow-1 d-flex flex-column justify-content-end'>
+              <div className='p-3 flex-grow-1 d-flex flex-column justify-content-end overflow-auto'>
                 {chatHistory.map((chat, index) => (
                   <div className={`${chat.sender === userData._id ? 'align-self-end bg-primary' : 'bg-secondary'} 
-                    mt-1 py-1 px-3 rounded-pill text-white`}
-                    style={{width:"fit-content"}}
-                    key={index}>{chat.message}
+                    mt-1 py-1 px-3 rounded-pill text-white text-break`}
+                    style={{width:"fit-content"}} key={index}
+                  >
+                    {chat.message}
                   </div>
                 ))}
               </div>

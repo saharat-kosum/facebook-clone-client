@@ -45,11 +45,10 @@ export interface CommentType {
 }
 
 export interface ChatHistory {
+  _id?:string;
   sender: string;
+  receiver: string;
   message: string;
-}
-
-export interface WsMessagePayload {
-  targetUser: string;
-  message: string;
+  createdAt?: Date;
+  updatedAt?: Date;
 }
