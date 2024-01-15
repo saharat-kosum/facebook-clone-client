@@ -42,6 +42,8 @@ This project is designed for honing front-end development skills, specifically f
 
 - Search user
 
+- Live chat
+
 ## Installation
 
 Clone the project
