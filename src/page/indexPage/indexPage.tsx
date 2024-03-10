@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import picture from "./facebookIcon.svg";
 import { useMediaQuery } from "../../utils/useMediaQuery";
 import CreateAccount from "../../component/modals/CreateAccount";
@@ -13,7 +13,6 @@ function IndexPage() {
   const isTablet = useMediaQuery("(min-width: 767px)");
   const prefixURL = process.env.REACT_APP_PREFIX_URL;
   const [processing, setProcessing] = useState(false);
-  const [showAlert, setShowAlert] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [isLoginFailed, setIsLoginFailed] = useState(false);
   const navigate = useNavigate();
@@ -23,22 +22,6 @@ function IndexPage() {
     password: "",
   });
 
-  useEffect(() => {
-    if (showAlert) {
-      const timer = setTimeout(() => {
-        setShowAlert(false);
-      }, 2000);
-
-      return () => {
-        clearTimeout(timer);
-      };
-    }
-  }, [showAlert]);
-
-  const handleAlertClick = () => {
-    setShowAlert(false);
-  };
-
   const saveToken = (value: string) => {
     sessionStorage.setItem("userToken", value);
     navigate("/home");
@@ -46,23 +29,29 @@ function IndexPage() {
 
   const logInHandle = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    setProcessing(true);
-    try {
-      const response = await axios.post(`${prefixURL}/auth/login`, user);
-      const data = await response.data;
+    const form = event.currentTarget;
+    if (form.checkValidity()) {
+      setProcessing(true);
+      try {
+        const response = await axios.post(`${prefixURL}/auth/login`, user);
+        const data = await response.data;
 
-      dispatch(setLogIn(data.user));
-      saveToken(data.token);
-    } catch (error) {
-      console.error(error);
-      if(axios.isAxiosError(error)){
-        const axiosError = error as AxiosError;
-        if(axiosError.response?.status){
-          setIsLoginFailed(true)
+        dispatch(setLogIn(data.user));
+        saveToken(data.token);
+      } catch (error) {
+        console.error(error);
+        if (axios.isAxiosError(error)) {
+          const axiosError = error as AxiosError;
+          if (axiosError.response?.status) {
+            setIsLoginFailed(true);
+          }
         }
+      } finally {
+        setProcessing(false);
       }
-    } finally {
+    } else {
       setProcessing(false);
+      form.classList.add("was-validated");
     }
   };
 
@@ -77,9 +66,8 @@ function IndexPage() {
   return (
     <div className="container" style={{ height: "100vh" }}>
       <CreateAccount
-        setShowAlert={setShowAlert}
         setIsProcessing={setProcessing}
-        setIsSuccess={setIsSuccess}
+        setIsSuccessFull={setIsSuccess}
       />
       <Loading isShow={processing} />
       <div
@@ -99,7 +87,11 @@ function IndexPage() {
             className="border rounded p-3 shadow mb-4"
             style={{ backgroundColor: "white" }}
           >
-            <form onSubmit={(e) => logInHandle(e)}>
+            <form
+              className="needs-validation"
+              noValidate
+              onSubmit={(e) => logInHandle(e)}
+            >
               <div className="mb-3">
                 <input
                   type="text"
@@ -107,7 +99,9 @@ function IndexPage() {
                   placeholder="Email address"
                   name="email"
                   onChange={(e) => handleChange(e)}
+                  required
                 />
+                <div className="invalid-feedback">E-mail is required.</div>
               </div>
               <div className="mb-3">
                 <input
@@ -116,8 +110,14 @@ function IndexPage() {
                   placeholder="Password"
                   name="password"
                   onChange={(e) => handleChange(e)}
+                  required
                 />
-                {isLoginFailed && <div className="mt-1 text-danger">Invalid E-mail or Password</div>}
+                <div className="invalid-feedback">Password is required.</div>
+                {isLoginFailed && (
+                  <div className="mt-1 text-danger">
+                    Invalid E-mail or Password
+                  </div>
+                )}
               </div>
               <button type="submit" className="btn btn-primary w-100 lh-lg">
                 Log in
@@ -136,38 +136,26 @@ function IndexPage() {
           <b>Create a Page</b> for a celebrity, brand or business.
         </div>
       </div>
-      {showAlert &&
-        (isSuccess ? (
-          <div
-            className="alert alert-success alert-dismissible fade show m-5 position-fixed end-0 bottom-0"
-            role="alert"
-            style={{ zIndex: "9999" }}
-          >
-            Sign Up Success!
-            <button
-              type="button"
-              className="btn-close"
-              data-bs-dismiss="alert"
-              aria-label="Close"
-              onClick={handleAlertClick}
-            ></button>
+      <div
+        className={`toast align-items-center position-fixed end-0 bottom-0 mx-sm-5 mb-4 mx-1`}
+        role="alert"
+        aria-live="assertive"
+        aria-atomic="true"
+        id="liveToast"
+        style={{ zIndex: "9999" }}
+      >
+        <div className="d-flex">
+          <div className="toast-body">
+            {isSuccess ? "Sign Up Success!" : "Sign Up Failed!"}
           </div>
-        ) : (
-          <div
-            className="alert alert-danger alert-dismissible fade show m-5 position-fixed end-0 bottom-0"
-            role="alert"
-            style={{ zIndex: "9999" }}
-          >
-            Sign Up Failed!
-            <button
-              type="button"
-              className="btn-close"
-              data-bs-dismiss="alert"
-              aria-label="Close"
-              onClick={handleAlertClick}
-            ></button>
-          </div>
-        ))}
+          <button
+            type="button"
+            className="btn-close me-2 m-auto"
+            data-bs-dismiss="toast"
+            aria-label="Close"
+          ></button>
+        </div>
+      </div>
     </div>
   );
 }

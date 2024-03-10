@@ -3,7 +3,6 @@ import { AppDispatch, useAppSelector } from '../../redux/Store';
 import NavBar from '../../component/navBar/NavBar';
 import Loading from '../../component/Loading';
 import axios from 'axios';
-import { useParams } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { setLogIn } from '../../redux/authSlice';
 import { ChatHistory, UserType } from '../../type';
@@ -18,7 +17,6 @@ function ChatPage() {
   const prefixURL = process.env.REACT_APP_PREFIX_URL;
   const prefixWS = process.env.REACT_APP_PREFIX_WS;
   const dispatch = useDispatch<AppDispatch>();
-  const params = useParams()
   const [ws,setWs] = useState<null | WebSocket>(null)
   const [message, setMessage] = useState<string>('')
   const [targetUser, setTargetUser] = useState<UserType | undefined>(undefined)
@@ -63,6 +61,7 @@ function ChatPage() {
     if (userData && authToken) {
       getFriends(authToken);
     }
+    // eslint-disable-next-line
   },[userData,authToken])
 
   const getUserToken = () => {

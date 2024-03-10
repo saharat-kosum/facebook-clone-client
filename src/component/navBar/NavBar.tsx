@@ -119,7 +119,9 @@ function NavBar({token} : NavbarProps) {
             <i className="bi bi-list p-2 bg-secondary-subtle rounded-circle hover-cursor"></i>
           </li>
           <li>
-            <i className="bi bi-chat-dots-fill p-2 bg-secondary-subtle rounded-circle hover-cursor"></i>
+            <Link to='/chat' style={{ color: "inherit", padding: "unset" }}>
+              <i className="bi bi-chat-dots-fill p-2 bg-secondary-subtle rounded-circle hover-cursor"></i>
+            </Link>
           </li>
           <li>
             <i className="bi bi-bell-fill p-2 bg-secondary-subtle rounded-circle hover-cursor"></i>

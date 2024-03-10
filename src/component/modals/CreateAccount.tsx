@@ -3,6 +3,7 @@ import { parseISO, format } from "date-fns";
 import axios from "axios";
 import FileDropzone from "../DropZone";
 import { UserType } from "../../type";
+import { Toast } from "bootstrap";
 
 const defaultUserData: UserType = {
   dateOfBirth: "",
@@ -16,14 +17,12 @@ const defaultUserData: UserType = {
 
 interface CreateAccountProps {
   setIsProcessing: (processing: boolean) => void;
-  setShowAlert: (showAlert: boolean) => void;
-  setIsSuccess: (success: boolean) => void;
+  setIsSuccessFull: (success: boolean) => void;
 }
 
 function CreateAccount({
   setIsProcessing,
-  setShowAlert,
-  setIsSuccess,
+  setIsSuccessFull,
 }: CreateAccountProps) {
   const prefixURL = process.env.REACT_APP_PREFIX_URL;
   const [dateOfBirth, setDateOfBirth] = useState("");
@@ -66,9 +65,9 @@ function CreateAccount({
 
   const signUpHandle = async (event: React.FormEvent<HTMLFormElement>) => {
     setIsProcessing(true);
-    setIsSuccess(false);
     event.preventDefault();
     const form = event.currentTarget;
+
     if (form.checkValidity()) {
       const formData = new FormData();
       if (imageFile) {
@@ -87,13 +86,18 @@ function CreateAccount({
         );
         if (response.status === 200) {
           handleReset();
-          setIsSuccess(true);
+          setIsSuccessFull(true);
         }
       } catch (err) {
         console.error(err);
+        setIsSuccessFull(false);
       } finally {
-        setShowAlert(true);
         setIsProcessing(false);
+        const toastLiveExample = document.getElementById("liveToast");
+        if (toastLiveExample) {
+          const toastBootstrap = new Toast(toastLiveExample);
+          toastBootstrap.show();
+        }
       }
     } else {
       form.classList.add("was-validated");
