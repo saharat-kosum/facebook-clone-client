@@ -1,6 +1,6 @@
 import React from "react";
-import { useMediaQuery } from "../../utils/useMediaQuery";
-import { useAppSelector } from "../../redux/Store";
+import { useMediaQuery } from "../utils/useMediaQuery";
+import { useAppSelector } from "../redux/Store";
 
 function CreatePost() {
   const isMobile = useMediaQuery("(min-width: 424px)");

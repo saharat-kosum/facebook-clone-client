@@ -1,22 +1,24 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { useMediaQuery } from "../../utils/useMediaQuery";
-import { useAppSelector } from "../../redux/Store";
-import { UserType } from "../../type";
+import { useMediaQuery } from "../utils/useMediaQuery";
+import { useAppSelector } from "../redux/Store";
+import { UserType } from "../type";
 import axios from "axios";
 
 interface NavbarProps {
   token: string | undefined;
 }
 
-function NavBar({token} : NavbarProps) {
+function NavBar({ token }: NavbarProps) {
   const isTablet = useMediaQuery("(min-width: 570px)");
   const userData = useAppSelector((state) => state.auth.user);
   const prefix_img_url = process.env.REACT_APP_PREFIX_URL_IMG;
   const profilePicture = useAppSelector((state) => state.auth.mockIMG);
   const prefixURL = process.env.REACT_APP_PREFIX_URL;
   const navigate = useNavigate();
-  const [searchUser,setSearchUser] = useState<UserType[] | undefined>(undefined);
+  const [searchUser, setSearchUser] = useState<UserType[] | undefined>(
+    undefined
+  );
 
   const logOutHandle = () => {
     sessionStorage.removeItem("userToken");
@@ -27,7 +29,7 @@ function NavBar({token} : NavbarProps) {
     navigate(`/profile/${userData?._id}`);
   };
 
-  const searchHandle = async (event : React.ChangeEvent<HTMLInputElement>) => {
+  const searchHandle = async (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.value) {
       try {
         const response = await axios.get(
@@ -39,17 +41,17 @@ function NavBar({token} : NavbarProps) {
           }
         );
         const data = response.data;
-        setSearchUser(data.users)
+        setSearchUser(data.users);
       } catch (err) {
         console.error(err);
       }
     } else {
-      setSearchUser(undefined)
+      setSearchUser(undefined);
     }
   };
 
   const clearUsers = () => {
-    setSearchUser(undefined)
+    setSearchUser(undefined);
   };
 
   return (
@@ -78,36 +80,45 @@ function NavBar({token} : NavbarProps) {
                 aria-label="Search"
                 style={{ border: "none" }}
                 onChange={(e) => searchHandle(e)}
-                onBlur={()=>clearUsers()}
+                onBlur={() => clearUsers()}
               />
               <button className="btn position-absolute" type="submit">
                 <i className="bi bi-search"></i>
               </button>
-              {searchUser && searchUser.length >0 ? 
-                <ul className="dropdown-menu d-block w-100" style={{ top: "38px" }}
+              {searchUser && searchUser.length > 0 ? (
+                <ul
+                  className="dropdown-menu d-block w-100"
+                  style={{ top: "38px" }}
                   onMouseDown={(event: React.MouseEvent) => {
                     event.preventDefault();
                   }}
                 >
-                {searchUser.map((user) =>
-                  <li>
-                    <a className="dropdown-item" href={`/profile/${user._id}`}>
-                      <img
-                        alt="profile"
-                        className="rounded-circle border me-2"
-                        src={
-                          user?.picturePath
-                            ? prefix_img_url + user?.picturePath
-                            : profilePicture
-                        }
-                        style={{ width: "36px", height: "36px", objectFit: "cover" }}
-                      />
-                      {user.firstName} {user.lastName}
-                    </a>
-                  </li>
-                )}
-              </ul>
-              : null}
+                  {searchUser.map((user) => (
+                    <li>
+                      <a
+                        className="dropdown-item"
+                        href={`/profile/${user._id}`}
+                      >
+                        <img
+                          alt="profile"
+                          className="rounded-circle border me-2"
+                          src={
+                            user?.picturePath
+                              ? prefix_img_url + user?.picturePath
+                              : profilePicture
+                          }
+                          style={{
+                            width: "36px",
+                            height: "36px",
+                            objectFit: "cover",
+                          }}
+                        />
+                        {user.firstName} {user.lastName}
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              ) : null}
             </form>
           )}
         </div>
@@ -119,7 +130,7 @@ function NavBar({token} : NavbarProps) {
             <i className="bi bi-list p-2 bg-secondary-subtle rounded-circle hover-cursor"></i>
           </li>
           <li>
-            <Link to='/chat' style={{ color: "inherit", padding: "unset" }}>
+            <Link to="/chat" style={{ color: "inherit", padding: "unset" }}>
               <i className="bi bi-chat-dots-fill p-2 bg-secondary-subtle rounded-circle hover-cursor"></i>
             </Link>
           </li>

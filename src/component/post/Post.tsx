@@ -3,7 +3,7 @@ import { PostType } from "../../type";
 import { useAppSelector } from "../../redux/Store";
 import { format } from "date-fns";
 import { useNavigate } from "react-router-dom";
-import CommentComponent from "../CommentComponent";
+import CommentComponent from "./CommentComponent";
 
 interface PostProps {
   props: PostType;
@@ -25,7 +25,7 @@ function Post({
   const profilePicture = useAppSelector((state) => state.auth.mockIMG);
   const prefix_img_url = process.env.REACT_APP_PREFIX_URL_IMG;
   const [createDate, setCreateDate] = useState("");
-  const [commentInPost, setCommentInPost] = useState<string>('');
+  const [commentInPost, setCommentInPost] = useState<string>("");
   const [isLike, setIsLike] = useState(false);
   const userData = useAppSelector((state) => state.auth.user);
   const navigate = useNavigate();
@@ -179,14 +179,16 @@ function Post({
           onClick={() => {
             if (props._id) {
               commentPost(props._id, commentInPost);
-              setCommentInPost('')
+              setCommentInPost("");
             }
           }}
         ></i>
       </div>
       {props.comments &&
         props.comments.length > 0 &&
-        props.comments.map((comment,index) => <CommentComponent key={index} comment={comment} />)}
+        props.comments.map((comment, index) => (
+          <CommentComponent key={index} comment={comment} />
+        ))}
     </div>
   );
 }

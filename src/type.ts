@@ -1,11 +1,12 @@
 export interface InitialState {
   mode: string;
   user: UserType | null;
-  mockIMG : string;
+  mockIMG: string;
+  loading: boolean;
 }
 
 export interface UserType {
-  _id?:string;
+  _id?: string;
   dateOfBirth: string;
   firstName: string;
   lastName: string;
@@ -20,7 +21,7 @@ export interface UserType {
 }
 
 export interface PostType {
-  _id?:string;
+  _id?: string;
   userId: string;
   firstName: string;
   lastName: string;
@@ -45,7 +46,7 @@ export interface CommentType {
 }
 
 export interface ChatHistory {
-  _id?:string;
+  _id?: string;
   sender: string;
   receiver: string;
   message: string;

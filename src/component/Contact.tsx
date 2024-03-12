@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
-import { useAppSelector } from "../../redux/Store";
+import { useAppSelector } from "../redux/Store";
 import axios from "axios";
-import { UserType } from "../../type";
+import { UserType } from "../type";
 import { useNavigate } from "react-router-dom";
 
 interface ContactProps {
@@ -12,7 +12,9 @@ interface ContactProps {
 function Contact({ setProcessing, token }: ContactProps) {
   const userData = useAppSelector((state) => state.auth.user);
   const prefixURL = process.env.REACT_APP_PREFIX_URL;
-  const [suggestUser, setSuggestUser] = useState<UserType[] | undefined>(undefined);
+  const [suggestUser, setSuggestUser] = useState<UserType[] | undefined>(
+    undefined
+  );
   const [friends, setFriends] = useState<UserType[] | undefined>(undefined);
   const prefix_img_url = process.env.REACT_APP_PREFIX_URL_IMG;
   const profilePicture = useAppSelector((state) => state.auth.mockIMG);
@@ -28,7 +30,7 @@ function Contact({ setProcessing, token }: ContactProps) {
     // eslint-disable-next-line
   }, [userData]);
 
-  const navigateProfile = (id : string) => {
+  const navigateProfile = (id: string) => {
     navigate(`/profile/${id}`);
   };
 
@@ -47,7 +49,7 @@ function Contact({ setProcessing, token }: ContactProps) {
   };
 
   const getFriends = async () => {
-    if(userData){
+    if (userData) {
       try {
         const response = await axios.get(
           `${prefixURL}/users/${userData?._id}/friends`,
@@ -70,7 +72,7 @@ function Contact({ setProcessing, token }: ContactProps) {
     try {
       const response = await axios.put(
         `${prefixURL}/users/${userData?._id}/${friendId}`,
-        {userId : userData?._id},
+        { userId: userData?._id },
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -81,8 +83,8 @@ function Contact({ setProcessing, token }: ContactProps) {
         const filter = suggestUser?.filter((user) => user._id !== friendId);
         setSuggestUser(filter);
         const addFriend = suggestUser?.filter((user) => user._id === friendId);
-        if(addFriend){
-          friends?.push(addFriend[0])
+        if (addFriend) {
+          friends?.push(addFriend[0]);
         }
       }
     } catch (error) {
@@ -97,7 +99,7 @@ function Contact({ setProcessing, token }: ContactProps) {
     try {
       const response = await axios.put(
         `${prefixURL}/users/${userData?._id}/${friendId}`,
-        {userId : userData?._id},
+        { userId: userData?._id },
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -137,13 +139,19 @@ function Contact({ setProcessing, token }: ContactProps) {
         </div>
         <ul className="" style={{ padding: "unset", width: "270px" }}>
           {suggestUser &&
-            suggestUser.map((user,index) => (
-              <li key={index} className="p-1 w-100 text-start lh-base d-flex justify-content-between">
-                <div className="text-capitalize hover-cursor" onClick={()=>{
-                  if(user._id){
-                    navigateProfile(user._id)
-                  }
-                }}>
+            suggestUser.map((user, index) => (
+              <li
+                key={index}
+                className="p-1 w-100 text-start lh-base d-flex justify-content-between"
+              >
+                <div
+                  className="text-capitalize hover-cursor"
+                  onClick={() => {
+                    if (user._id) {
+                      navigateProfile(user._id);
+                    }
+                  }}
+                >
                   <img
                     alt="profile"
                     className="rounded-circle border me-2"
@@ -152,7 +160,11 @@ function Contact({ setProcessing, token }: ContactProps) {
                         ? prefix_img_url + user?.picturePath
                         : profilePicture
                     }
-                    style={{ width: "36px", height: "36px", objectFit: "cover" }}
+                    style={{
+                      width: "36px",
+                      height: "36px",
+                      objectFit: "cover",
+                    }}
                   />
                   {user.firstName} {user.lastName}
                 </div>
@@ -179,13 +191,19 @@ function Contact({ setProcessing, token }: ContactProps) {
         </div>
         <ul className="" style={{ padding: "unset", width: "270px" }}>
           {friends &&
-            friends.map((friend,index) => (
-              <li key={index} className="p-1 w-100 text-start lh-base d-flex justify-content-between ">
-                <div className="text-capitalize hover-cursor" onClick={()=>{
-                  if(friend._id){
-                    navigateProfile(friend._id)
-                  }
-                }}>
+            friends.map((friend, index) => (
+              <li
+                key={index}
+                className="p-1 w-100 text-start lh-base d-flex justify-content-between "
+              >
+                <div
+                  className="text-capitalize hover-cursor"
+                  onClick={() => {
+                    if (friend._id) {
+                      navigateProfile(friend._id);
+                    }
+                  }}
+                >
                   <img
                     alt="profile"
                     className="rounded-circle border me-2"
@@ -194,7 +212,11 @@ function Contact({ setProcessing, token }: ContactProps) {
                         ? prefix_img_url + friend?.picturePath
                         : profilePicture
                     }
-                    style={{ width: "36px", height: "36px", objectFit: "cover" }}
+                    style={{
+                      width: "36px",
+                      height: "36px",
+                      objectFit: "cover",
+                    }}
                   />
                   {friend.firstName} {friend.lastName}
                 </div>

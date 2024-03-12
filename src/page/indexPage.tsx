@@ -1,12 +1,12 @@
 import React, { useState } from "react";
-import picture from "./facebookIcon.svg";
-import { useMediaQuery } from "../../utils/useMediaQuery";
-import CreateAccount from "../../component/modals/CreateAccount";
-import Loading from "../../component/Loading";
+import picture from "../assets/facebookIcon.svg";
+import { useMediaQuery } from "../utils/useMediaQuery";
+import CreateAccount from "../component/modals/CreateAccount";
+import Loading from "../component/Loading";
 import axios, { AxiosError } from "axios";
-import { setLogIn } from "../../redux/authSlice";
+import { setLogIn } from "../redux/authSlice";
 import { useDispatch } from "react-redux";
-import { AppDispatch } from "../../redux/Store";
+import { AppDispatch } from "../redux/Store";
 import { useNavigate } from "react-router-dom";
 
 function IndexPage() {

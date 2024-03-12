@@ -1,6 +1,6 @@
 import React from "react";
-import { CommentType } from "../type";
-import { useAppSelector } from "../redux/Store";
+import { CommentType } from "../../type";
+import { useAppSelector } from "../../redux/Store";
 
 interface CommentProps {
   comment: CommentType;
