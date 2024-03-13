@@ -3,6 +3,7 @@ export interface InitialState {
   user: UserType | null;
   mockIMG: string;
   loading: boolean;
+  token: string | null;
 }
 
 export interface UserType {

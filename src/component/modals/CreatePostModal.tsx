@@ -1,18 +1,19 @@
 import React, { useEffect, useState } from "react";
 import FileDropzone from "../DropZone";
-import { useAppSelector } from "../../redux/Store";
+import { AppDispatch, useAppSelector } from "../../redux/Store";
 import { PostPayload, PostType } from "../../type";
 import axios from "axios";
+import { useDispatch } from "react-redux";
+import { setLoading } from "../../redux/authSlice";
 
 interface PostModalProps {
-  token : string | undefined;
-  posts : PostType[] | undefined;
+  token: string | undefined;
+  posts: PostType[] | undefined;
   setPosts: (posts: PostType[]) => void;
-  setProcessing: (processing: boolean) => void;
-  sortPost: (post: PostType[]) => PostType[] ;
+  sortPost: (post: PostType[]) => PostType[];
 }
 
-function CreatePostModal({token, posts, setPosts, setProcessing, sortPost} : PostModalProps) {
+function CreatePostModal({ token, posts, setPosts, sortPost }: PostModalProps) {
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const [uploadedFileURL, setUploadedFileURL] = useState<string>("");
   const [description, setDescription] = useState<string>("");
@@ -20,6 +21,7 @@ function CreatePostModal({token, posts, setPosts, setProcessing, sortPost} : Pos
   const prefix_img_url = process.env.REACT_APP_PREFIX_URL_IMG;
   const prefixURL = process.env.REACT_APP_PREFIX_URL;
   const profilePicture = useAppSelector((state) => state.auth.mockIMG);
+  const dispatch = useDispatch<AppDispatch>();
 
   const handleFileAdded = (files: File[]) => {
     setUploadedFile(files[0]);
@@ -36,7 +38,7 @@ function CreatePostModal({token, posts, setPosts, setProcessing, sortPost} : Pos
   }, [uploadedFile]);
 
   const handlePost = async () => {
-    setProcessing(true)
+    dispatch(setLoading(true));
     try {
       const payload: PostPayload = {
         userId: userData?._id,
@@ -51,21 +53,21 @@ function CreatePostModal({token, posts, setPosts, setProcessing, sortPost} : Pos
       const response = await axios.post(`${prefixURL}/posts`, formData, {
         headers: {
           "Content-Type": "multipart/form-data",
-          "Authorization": `Bearer ${token}`
+          Authorization: `Bearer ${token}`,
         },
       });
-      const data : PostType = response.data;
-      if(posts){
-        const newPost = posts.concat(data)
-        const sortData = sortPost(newPost)
+      const data: PostType = response.data;
+      if (posts) {
+        const newPost = posts.concat(data);
+        const sortData = sortPost(newPost);
         setPosts(sortData);
       }
     } catch (error) {
       console.error("Error create post", error);
     } finally {
-      setProcessing(false)
-      setUploadedFileURL('')
-      setDescription('')
+      dispatch(setLoading(false));
+      setUploadedFileURL("");
+      setDescription("");
     }
   };
 
@@ -153,7 +155,7 @@ function CreatePostModal({token, posts, setPosts, setProcessing, sortPost} : Pos
                 type="button"
                 className="btn btn-primary w-100"
                 data-bs-dismiss="modal"
-                onClick={()=>handlePost()}
+                onClick={() => handlePost()}
               >
                 Post
               </button>

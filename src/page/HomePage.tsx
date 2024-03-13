@@ -10,89 +10,60 @@ import { AppDispatch, useAppSelector } from "../redux/Store";
 import axios from "axios";
 import { CommentType, PostType } from "../type";
 import Loading from "../component/Loading";
-import { setLogIn } from "../redux/authSlice";
+import { setLoading, setLogIn } from "../redux/authSlice";
 import { useDispatch } from "react-redux";
 
 function HomePage() {
   const contactHandle = useMediaQuery("(min-width: 1270px)");
   const isLaptop = useMediaQuery("(min-width: 1070px)");
-  const prefixURL = process.env.REACT_APP_PREFIX_URL;
-  const [authToken, setAuthToken] = useState<string | undefined>(undefined);
   const [comment, setComment] = useState<string>("");
   const userData = useAppSelector((state) => state.auth.user);
-  const [posts, setPosts] = useState<PostType[] | undefined>(undefined);
-  const [processing, setProcessing] = useState(false);
+  const isLoading = useAppSelector((state) => state.auth.loading);
+  const token = useAppSelector((state) => state.auth.token);
+  const [posts, setPosts] = useState<PostType[]>([]);
   const dispatch = useDispatch<AppDispatch>();
 
   useEffect(() => {
-    const token = getUserToken();
-    setAuthToken(token);
-    if (token) {
-      getFeedPosts(token);
+    if (token && token.length > 0) {
+      getFeedPosts();
       if (!userData) {
-        getUserDetail(token);
+        getUserDetail();
       }
+    } else {
+      window.location.replace("/");
     }
-    // eslint-disable-next-line
-  }, []);
+  }, [token]);
 
-  const getFeedPosts = async (token: string) => {
-    setProcessing(true);
+  const getFeedPosts = async () => {
+    dispatch(setLoading(true));
     try {
-      const response = await axios.get(`${prefixURL}/posts`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      const data = response.data;
-      const sortData = sortPost(data);
-      setPosts(sortData);
+      const { data } = await axios.get(`/posts`);
+      setPosts(data);
     } catch (err) {
       console.error(err);
     } finally {
-      setProcessing(false);
+      dispatch(setLoading(false));
     }
   };
 
-  const getUserDetail = async (token: string) => {
-    setProcessing(true);
+  const getUserDetail = async () => {
+    dispatch(setLoading(true));
     try {
-      const response = await axios.get(`${prefixURL}/users`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      const data = response.data;
+      const { data } = await axios.get(`/users`);
       dispatch(setLogIn(data));
     } catch (err) {
       console.error(err);
     } finally {
-      setProcessing(false);
-    }
-  };
-
-  const getUserToken = () => {
-    const token = sessionStorage.getItem("userToken");
-    if (token && token.length > 0) {
-      return token;
-    } else {
-      window.location.replace("/");
+      dispatch(setLoading(false));
     }
   };
 
   const likePost = async (id: string) => {
-    const token = getUserToken();
-    setProcessing(true);
+    dispatch(setLoading(true));
     try {
-      const response = await axios.put(
-        `${prefixURL}/posts/${id}/like`,
-        { userId: userData?._id },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+      const response = await axios.put(`/posts/${id}/like`, {
+        userId: userData?._id,
+      });
       const data: PostType = response.data;
       const updatedPosts = posts?.map((post) => {
         if (post._id === data._id) {
@@ -104,13 +75,12 @@ function HomePage() {
     } catch (error) {
       console.error(error);
     } finally {
-      setProcessing(false);
+      dispatch(setLoading(false));
     }
   };
 
   const commentPost = async (id: string, commentProp: string) => {
-    const token = getUserToken();
-    setProcessing(true);
+    dispatch(setLoading(true));
     if (!userData) {
       return;
     }
@@ -121,15 +91,7 @@ function HomePage() {
       description: commentProp,
     };
     try {
-      const response = await axios.post(
-        `${prefixURL}/posts/add/comment/${id}`,
-        newComment,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+      const response = await axios.post(`/posts/add/comment/${id}`, newComment);
       const data: PostType = response.data;
       const updatedPosts = posts?.map((post) => {
         if (post._id === data._id) {
@@ -142,26 +104,20 @@ function HomePage() {
     } catch (error) {
       console.error(error);
     } finally {
-      setProcessing(false);
+      dispatch(setLoading(false));
     }
   };
 
   const deletePost = async (id: string) => {
     const result = window.confirm("Are you sure you want to delete this post?");
     if (result) {
-      const token = getUserToken();
-      setProcessing(true);
+      dispatch(setLoading(true));
       try {
-        const response = await axios.delete(`${prefixURL}/posts/delete/${id}`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
+        const response = await axios.delete(`/posts/delete/${id}`);
         if (response.status === 200) {
           const filter = posts?.filter((post) => post._id !== id);
           if (filter) {
-            const sortData = sortPost(filter);
-            setPosts(sortData);
+            setPosts(filter);
           }
         } else if (response.status === 404) {
           alert("Post not found");
@@ -171,39 +127,23 @@ function HomePage() {
       } catch (error) {
         console.error(error);
       } finally {
-        setProcessing(false);
+        dispatch(setLoading(false));
       }
     }
   };
 
-  const sortPost = (posts: PostType[]): PostType[] => {
-    return posts.slice().sort((a, b) => {
-      if (a.createdAt === undefined && b.createdAt === undefined) {
-        return 0;
-      }
-      if (a.createdAt === undefined) {
-        return 1;
-      }
-      if (b.createdAt === undefined) {
-        return -1;
-      }
-      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
-    });
-  };
-
-  if (!authToken) {
+  if (!token) {
     return <></>;
   }
 
   return (
     <>
-      <NavBar token={authToken} />
-      <Loading isShow={processing} />
+      <NavBar />
+      <Loading isShow={isLoading} />
       <div className="px-2">
         <CreatePostModal
-          token={getUserToken()}
+          token={token}
           setPosts={setPosts}
-          setProcessing={setProcessing}
           sortPost={sortPost}
           posts={posts}
         />
@@ -254,7 +194,7 @@ function HomePage() {
                 display: contactHandle ? "inherit" : "none",
               }}
             >
-              <Contact setProcessing={setProcessing} token={getUserToken()} />
+              <Contact token={getUserToken()} />
             </div>
           </div>
         </div>

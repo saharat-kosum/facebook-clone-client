@@ -1,17 +1,13 @@
 import React, { useEffect, useState } from "react";
-import { useAppSelector } from "../redux/Store";
+import { AppDispatch, useAppSelector } from "../redux/Store";
 import axios from "axios";
 import { UserType } from "../type";
 import { useNavigate } from "react-router-dom";
+import { useDispatch } from "react-redux";
+import { setLoading } from "../redux/authSlice";
 
-interface ContactProps {
-  setProcessing: (processing: boolean) => void;
-  token: string | undefined;
-}
-
-function Contact({ setProcessing, token }: ContactProps) {
+function Contact() {
   const userData = useAppSelector((state) => state.auth.user);
-  const prefixURL = process.env.REACT_APP_PREFIX_URL;
   const [suggestUser, setSuggestUser] = useState<UserType[] | undefined>(
     undefined
   );
@@ -19,6 +15,7 @@ function Contact({ setProcessing, token }: ContactProps) {
   const prefix_img_url = process.env.REACT_APP_PREFIX_URL_IMG;
   const profilePicture = useAppSelector((state) => state.auth.mockIMG);
   const navigate = useNavigate();
+  const dispatch = useDispatch<AppDispatch>();
 
   useEffect(() => {
     getSuggest();
@@ -68,7 +65,7 @@ function Contact({ setProcessing, token }: ContactProps) {
   };
 
   const addFriend = async (friendId: string) => {
-    setProcessing(true);
+    dispatch(setLoading(true));
     try {
       const response = await axios.put(
         `${prefixURL}/users/${userData?._id}/${friendId}`,
@@ -90,12 +87,12 @@ function Contact({ setProcessing, token }: ContactProps) {
     } catch (error) {
       console.error(error);
     } finally {
-      setProcessing(false);
+      dispatch(setLoading(false));
     }
   };
 
   const removeFriend = async (friendId: string) => {
-    setProcessing(true);
+    dispatch(setLoading(true));
     try {
       const response = await axios.put(
         `${prefixURL}/users/${userData?._id}/${friendId}`,
@@ -113,7 +110,7 @@ function Contact({ setProcessing, token }: ContactProps) {
     } catch (error) {
       console.error(error);
     } finally {
-      setProcessing(false);
+      dispatch(setLoading(false));
     }
   };
 

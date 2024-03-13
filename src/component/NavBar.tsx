@@ -5,16 +5,11 @@ import { useAppSelector } from "../redux/Store";
 import { UserType } from "../type";
 import axios from "axios";
 
-interface NavbarProps {
-  token: string | undefined;
-}
-
-function NavBar({ token }: NavbarProps) {
+function NavBar() {
   const isTablet = useMediaQuery("(min-width: 570px)");
   const userData = useAppSelector((state) => state.auth.user);
   const prefix_img_url = process.env.REACT_APP_PREFIX_URL_IMG;
   const profilePicture = useAppSelector((state) => state.auth.mockIMG);
-  const prefixURL = process.env.REACT_APP_PREFIX_URL;
   const navigate = useNavigate();
   const [searchUser, setSearchUser] = useState<UserType[] | undefined>(
     undefined
@@ -33,12 +28,7 @@ function NavBar({ token }: NavbarProps) {
     if (event.target.value) {
       try {
         const response = await axios.get(
-          `${prefixURL}/users/search?search=${event.target.value}`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
+          `/users/search?search=${event.target.value}`
         );
         const data = response.data;
         setSearchUser(data.users);

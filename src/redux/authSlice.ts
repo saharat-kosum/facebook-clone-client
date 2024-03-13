@@ -5,6 +5,7 @@ const initialState: InitialState = {
   mode: "light",
   loading: false,
   user: null,
+  token: sessionStorage.getItem("userToken"),
   mockIMG:
     "https://img.freepik.com/free-vector/illustration-businessman_53876-5856.jpg?w=826&t=st=1693129793~exp=1693130393~hmac=7346bd884e9145dfe06641270fd59554806208016d3acec6f42b5aebba8c28f7",
 };
@@ -25,8 +26,12 @@ export const authSlice = createSlice({
     setLoading: (state, action: PayloadAction<boolean>) => {
       state.loading = action.payload;
     },
+    setToken: (state, action: PayloadAction<string>) => {
+      state.token = action.payload;
+    },
   },
 });
 
-export const { setMode, setLogIn, setLogOut } = authSlice.actions;
+export const { setMode, setLogIn, setLogOut, setLoading, setToken } =
+  authSlice.actions;
 export default authSlice.reducer;
