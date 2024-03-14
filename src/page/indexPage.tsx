@@ -4,19 +4,18 @@ import { useMediaQuery } from "../utils/useMediaQuery";
 import CreateAccount from "../component/modals/CreateAccount";
 import Loading from "../component/Loading";
 import axios, { AxiosError } from "axios";
-import { setLogIn } from "../redux/authSlice";
+import { setLoading, setLogIn } from "../redux/authSlice";
 import { useDispatch } from "react-redux";
-import { AppDispatch } from "../redux/Store";
+import { AppDispatch, useAppSelector } from "../redux/Store";
 import { useNavigate } from "react-router-dom";
 
 function IndexPage() {
   const isTablet = useMediaQuery("(min-width: 767px)");
-  const prefixURL = process.env.REACT_APP_PREFIX_URL;
-  const [processing, setProcessing] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [isLoginFailed, setIsLoginFailed] = useState(false);
   const navigate = useNavigate();
   const dispatch = useDispatch<AppDispatch>();
+  const isLoading = useAppSelector((state) => state.auth.loading);
   const [user, setUser] = useState({
     email: "",
     password: "",
@@ -31,9 +30,9 @@ function IndexPage() {
     event.preventDefault();
     const form = event.currentTarget;
     if (form.checkValidity()) {
-      setProcessing(true);
+      dispatch(setLoading(true));
       try {
-        const response = await axios.post(`${prefixURL}/auth/login`, user);
+        const response = await axios.post(`/auth/login`, user);
         const data = await response.data;
 
         dispatch(setLogIn(data.user));
@@ -47,10 +46,10 @@ function IndexPage() {
           }
         }
       } finally {
-        setProcessing(false);
+        dispatch(setLoading(false));
       }
     } else {
-      setProcessing(false);
+      dispatch(setLoading(false));
       form.classList.add("was-validated");
     }
   };
@@ -65,11 +64,8 @@ function IndexPage() {
 
   return (
     <div className="container" style={{ height: "100vh" }}>
-      <CreateAccount
-        setIsProcessing={setProcessing}
-        setIsSuccessFull={setIsSuccess}
-      />
-      <Loading isShow={processing} />
+      <CreateAccount setIsSuccessFull={setIsSuccess} />
+      <Loading isShow={isLoading} />
       <div
         className={`d-flex justify-content-evenly align-items-center ${
           isTablet ? "" : "flex-column gap-4"

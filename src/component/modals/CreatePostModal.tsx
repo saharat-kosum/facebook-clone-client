@@ -7,19 +7,16 @@ import { useDispatch } from "react-redux";
 import { setLoading } from "../../redux/authSlice";
 
 interface PostModalProps {
-  token: string | undefined;
   posts: PostType[] | undefined;
   setPosts: (posts: PostType[]) => void;
-  sortPost: (post: PostType[]) => PostType[];
 }
 
-function CreatePostModal({ token, posts, setPosts, sortPost }: PostModalProps) {
+function CreatePostModal({ posts, setPosts }: PostModalProps) {
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const [uploadedFileURL, setUploadedFileURL] = useState<string>("");
   const [description, setDescription] = useState<string>("");
   const userData = useAppSelector((state) => state.auth.user);
   const prefix_img_url = process.env.REACT_APP_PREFIX_URL_IMG;
-  const prefixURL = process.env.REACT_APP_PREFIX_URL;
   const profilePicture = useAppSelector((state) => state.auth.mockIMG);
   const dispatch = useDispatch<AppDispatch>();
 
@@ -50,17 +47,15 @@ function CreatePostModal({ token, posts, setPosts, sortPost }: PostModalProps) {
       }
       formData.append("postData", JSON.stringify(payload));
 
-      const response = await axios.post(`${prefixURL}/posts`, formData, {
+      const response = await axios.post(`/posts`, formData, {
         headers: {
           "Content-Type": "multipart/form-data",
-          Authorization: `Bearer ${token}`,
         },
       });
       const data: PostType = response.data;
       if (posts) {
-        const newPost = posts.concat(data);
-        const sortData = sortPost(newPost);
-        setPosts(sortData);
+        const newPost = [data, ...posts];
+        setPosts(newPost);
       }
     } catch (error) {
       console.error("Error create post", error);

@@ -18,64 +18,43 @@ function Contact() {
   const dispatch = useDispatch<AppDispatch>();
 
   useEffect(() => {
+    const getSuggest = async () => {
+      try {
+        const { data } = await axios.get(`/users/suggest/friends`);
+        setSuggestUser(data);
+      } catch (error) {
+        console.error(error);
+      }
+    };
+
     getSuggest();
-    // eslint-disable-next-line
   }, []);
 
   useEffect(() => {
+    const getFriends = async () => {
+      if (userData) {
+        try {
+          const { data } = await axios.get(`/users/${userData?._id}/friends`);
+          setFriends(data);
+        } catch (error) {
+          console.error(error);
+        }
+      }
+    };
+
     getFriends();
-    // eslint-disable-next-line
   }, [userData]);
 
   const navigateProfile = (id: string) => {
     navigate(`/profile/${id}`);
   };
 
-  const getSuggest = async () => {
-    try {
-      const response = await axios.get(`${prefixURL}/users/suggest/friends`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      const data = response.data;
-      setSuggestUser(data);
-    } catch (error) {
-      console.error(error);
-    }
-  };
-
-  const getFriends = async () => {
-    if (userData) {
-      try {
-        const response = await axios.get(
-          `${prefixURL}/users/${userData?._id}/friends`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
-        const data = response.data;
-        setFriends(data);
-      } catch (error) {
-        console.error(error);
-      }
-    }
-  };
-
   const addFriend = async (friendId: string) => {
     dispatch(setLoading(true));
     try {
-      const response = await axios.put(
-        `${prefixURL}/users/${userData?._id}/${friendId}`,
-        { userId: userData?._id },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+      const response = await axios.put(`$/users/${userData?._id}/${friendId}`, {
+        userId: userData?._id,
+      });
       if (response.status === 200) {
         const filter = suggestUser?.filter((user) => user._id !== friendId);
         setSuggestUser(filter);
@@ -94,15 +73,9 @@ function Contact() {
   const removeFriend = async (friendId: string) => {
     dispatch(setLoading(true));
     try {
-      const response = await axios.put(
-        `${prefixURL}/users/${userData?._id}/${friendId}`,
-        { userId: userData?._id },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+      const response = await axios.put(`/users/${userData?._id}/${friendId}`, {
+        userId: userData?._id,
+      });
       if (response.status === 200) {
         const filter = friends?.filter((user) => user._id !== friendId);
         setFriends(filter);

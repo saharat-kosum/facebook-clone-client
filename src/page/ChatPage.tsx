@@ -4,17 +4,14 @@ import NavBar from "../component/NavBar";
 import Loading from "../component/Loading";
 import axios from "axios";
 import { useDispatch } from "react-redux";
-import { setLogIn } from "../redux/authSlice";
+import { setLoading, setLogIn } from "../redux/authSlice";
 import { ChatHistory, UserType } from "../type";
 import { useMediaQuery } from "../utils/useMediaQuery";
 
 function ChatPage() {
-  const [authToken, setAuthToken] = useState<string | undefined>(undefined);
   const [friends, setFriends] = useState<UserType[] | undefined>(undefined);
   const userData = useAppSelector((state) => state.auth.user);
-  const [processing, setProcessing] = useState(false);
   const [isLoadingChat, setIsLoadingChat] = useState(false);
-  const prefixURL = process.env.REACT_APP_PREFIX_URL;
   const prefixWS = process.env.REACT_APP_PREFIX_WS;
   const dispatch = useDispatch<AppDispatch>();
   const [ws, setWs] = useState<null | WebSocket>(null);
@@ -23,25 +20,40 @@ function ChatPage() {
   const [chatHistory, setChatHistory] = useState<ChatHistory[]>([]);
   const prefix_img_url = process.env.REACT_APP_PREFIX_URL_IMG;
   const profilePicture = useAppSelector((state) => state.auth.mockIMG);
+  const isLoading = useAppSelector((state) => state.auth.loading);
+  const token = useAppSelector((state) => state.auth.token);
   const isLaptop = useMediaQuery("(min-width: 1024px)");
   const isMobile = useMediaQuery("(min-width: 425px)");
   const isTablet = useMediaQuery("(min-width: 768px)");
 
   useEffect(() => {
-    const token = getUserToken();
-    setAuthToken(token);
-    if (token) {
-      getFriends(token);
-      if (!userData) {
-        getUserDetail(token);
+    const fetchData = async () => {
+      dispatch(setLoading(true));
+      try {
+        if (token && token.length > 0) {
+          if (!userData) {
+            const { data } = await axios.get(`/users`);
+            dispatch(setLogIn(data));
+          } else {
+            const { data } = await axios.get(`/users/${userData._id}/friends`);
+            setFriends(data);
+          }
+        } else {
+          window.location.replace("/");
+        }
+      } catch (error) {
+        console.error(error);
+      } finally {
+        dispatch(setLoading(false));
       }
-    }
-    // eslint-disable-next-line
-  }, []);
+    };
+
+    fetchData();
+  }, [token, userData, dispatch, setFriends]);
 
   useEffect(() => {
-    if (prefixWS && authToken) {
-      const ws = new WebSocket(`${prefixWS}/?token=${authToken}`);
+    if (prefixWS && token) {
+      const ws = new WebSocket(`${prefixWS}/?token=${token}`);
       setWs(ws);
       ws.addEventListener("message", (event) => {
         const data = JSON.parse(event.data);
@@ -59,71 +71,13 @@ function ChatPage() {
         ws.close();
       };
     }
-  }, [prefixWS, authToken]);
-
-  useEffect(() => {
-    if (userData && authToken) {
-      getFriends(authToken);
-    }
-    // eslint-disable-next-line
-  }, [userData, authToken]);
-
-  const getUserToken = () => {
-    const token = sessionStorage.getItem("userToken");
-    if (token && token.length > 0) {
-      return token;
-    } else {
-      window.location.replace("/");
-    }
-  };
-
-  const getUserDetail = async (token: string) => {
-    setProcessing(true);
-    try {
-      const response = await axios.get(`${prefixURL}/users`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      const data = response.data;
-      dispatch(setLogIn(data));
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setProcessing(false);
-    }
-  };
-
-  const getFriends = async (token: string) => {
-    if (userData) {
-      try {
-        const response = await axios.get(
-          `${prefixURL}/users/${userData._id}/friends`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
-        const data = response.data;
-        setFriends(data);
-      } catch (error) {
-        console.error(error);
-      }
-    }
-  };
+  }, [prefixWS, token]);
 
   const onClickFriendHandle = async (friend: UserType) => {
     setTargetUser(friend);
     setIsLoadingChat(true);
     try {
-      const response = await axios.get(`${prefixURL}/chats/${friend._id}`, {
-        headers: {
-          Authorization: `Bearer ${authToken}`,
-        },
-      });
-
-      const data = response.data;
+      const { data } = await axios.get(`/chats/${friend._id}`);
       setChatHistory(data);
     } catch (error) {
       console.error(error);
@@ -155,8 +109,8 @@ function ChatPage() {
 
   return (
     <>
-      <NavBar token={authToken} />
-      <Loading isShow={processing} />
+      <NavBar />
+      <Loading isShow={isLoading} />
       <div className="d-flex bg-white" style={{ minHeight: "94vh" }}>
         <div className="w-25 border-end">
           <div className="d-flex justify-content-between align-items-center p-2 p-sm-3">

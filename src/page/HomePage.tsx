@@ -24,39 +24,29 @@ function HomePage() {
   const dispatch = useDispatch<AppDispatch>();
 
   useEffect(() => {
-    if (token && token.length > 0) {
-      getFeedPosts();
-      if (!userData) {
-        getUserDetail();
+    const fetchData = async () => {
+      dispatch(setLoading(true));
+      try {
+        if (token && token.length > 0) {
+          const { data } = await axios.get(`/posts`);
+          setPosts(data);
+
+          if (!userData) {
+            const { data } = await axios.get(`/users`);
+            dispatch(setLogIn(data));
+          }
+        } else {
+          window.location.replace("/");
+        }
+      } catch (error) {
+        console.error(error);
+      } finally {
+        dispatch(setLoading(false));
       }
-    } else {
-      window.location.replace("/");
-    }
-  }, [token]);
+    };
 
-  const getFeedPosts = async () => {
-    dispatch(setLoading(true));
-    try {
-      const { data } = await axios.get(`/posts`);
-      setPosts(data);
-    } catch (err) {
-      console.error(err);
-    } finally {
-      dispatch(setLoading(false));
-    }
-  };
-
-  const getUserDetail = async () => {
-    dispatch(setLoading(true));
-    try {
-      const { data } = await axios.get(`/users`);
-      dispatch(setLogIn(data));
-    } catch (err) {
-      console.error(err);
-    } finally {
-      dispatch(setLoading(false));
-    }
-  };
+    fetchData();
+  }, [token, userData, dispatch]);
 
   const likePost = async (id: string) => {
     dispatch(setLoading(true));
@@ -141,12 +131,7 @@ function HomePage() {
       <NavBar />
       <Loading isShow={isLoading} />
       <div className="px-2">
-        <CreatePostModal
-          token={token}
-          setPosts={setPosts}
-          sortPost={sortPost}
-          posts={posts}
-        />
+        <CreatePostModal setPosts={setPosts} posts={posts} />
         <div className="pb-3" style={{ minHeight: "94vh" }}>
           <div
             className="d-flex justify-content-between"
@@ -194,7 +179,7 @@ function HomePage() {
                 display: contactHandle ? "inherit" : "none",
               }}
             >
-              <Contact token={getUserToken()} />
+              <Contact />
             </div>
           </div>
         </div>

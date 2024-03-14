@@ -4,6 +4,9 @@ import axios from "axios";
 import FileDropzone from "../DropZone";
 import { UserType } from "../../type";
 import { Toast } from "bootstrap";
+import { useDispatch } from "react-redux";
+import { AppDispatch } from "../../redux/Store";
+import { setLoading } from "../../redux/authSlice";
 
 const defaultUserData: UserType = {
   dateOfBirth: "",
@@ -16,19 +19,15 @@ const defaultUserData: UserType = {
 };
 
 interface CreateAccountProps {
-  setIsProcessing: (processing: boolean) => void;
   setIsSuccessFull: (success: boolean) => void;
 }
 
-function CreateAccount({
-  setIsProcessing,
-  setIsSuccessFull,
-}: CreateAccountProps) {
-  const prefixURL = process.env.REACT_APP_PREFIX_URL;
+function CreateAccount({ setIsSuccessFull }: CreateAccountProps) {
   const [dateOfBirth, setDateOfBirth] = useState("");
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imageDataUrl, setImageDataUrl] = useState("");
   const [userData, setUserData] = useState(defaultUserData);
+  const dispatch = useDispatch<AppDispatch>();
 
   useEffect(() => {
     if (dateOfBirth) {
@@ -64,7 +63,7 @@ function CreateAccount({
   };
 
   const signUpHandle = async (event: React.FormEvent<HTMLFormElement>) => {
-    setIsProcessing(true);
+    dispatch(setLoading(true));
     event.preventDefault();
     const form = event.currentTarget;
 
@@ -75,15 +74,11 @@ function CreateAccount({
       }
       formData.append("userData", JSON.stringify(userData));
       try {
-        const response = await axios.post(
-          `${prefixURL}/auth/register`,
-          formData,
-          {
-            headers: {
-              "Content-Type": "multipart/form-data",
-            },
-          }
-        );
+        const response = await axios.post(`/auth/register`, formData, {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        });
         if (response.status === 200) {
           handleReset();
           setIsSuccessFull(true);
@@ -92,7 +87,7 @@ function CreateAccount({
         console.error(err);
         setIsSuccessFull(false);
       } finally {
-        setIsProcessing(false);
+        dispatch(setLoading(false));
         const toastLiveExample = document.getElementById("liveToast");
         if (toastLiveExample) {
           const toastBootstrap = new Toast(toastLiveExample);
@@ -101,7 +96,7 @@ function CreateAccount({
       }
     } else {
       form.classList.add("was-validated");
-      setIsProcessing(false);
+      dispatch(setLoading(false));
     }
   };
 
