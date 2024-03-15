@@ -13,16 +13,6 @@ const setupAxiosInterceptors = (token: string | null) => {
         return Promise.reject(error);
       }
     );
-  } else {
-    axios.interceptors.request.use(
-      function (config) {
-        delete config.headers.Authorization;
-        return config;
-      },
-      function (error) {
-        return Promise.reject(error);
-      }
-    );
   }
 };
 

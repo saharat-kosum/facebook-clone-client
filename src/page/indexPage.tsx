@@ -4,7 +4,7 @@ import { useMediaQuery } from "../utils/useMediaQuery";
 import CreateAccount from "../component/modals/CreateAccount";
 import Loading from "../component/Loading";
 import axios, { AxiosError } from "axios";
-import { setLoading, setLogIn } from "../redux/authSlice";
+import { setLoading, setLogIn, setToken } from "../redux/authSlice";
 import { useDispatch } from "react-redux";
 import { AppDispatch, useAppSelector } from "../redux/Store";
 import { useNavigate } from "react-router-dom";
@@ -36,6 +36,7 @@ function IndexPage() {
         const data = await response.data;
 
         dispatch(setLogIn(data.user));
+        dispatch(setToken(data.token));
         saveToken(data.token);
       } catch (error) {
         console.error(error);
