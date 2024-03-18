@@ -10,8 +10,9 @@ import { AppDispatch, useAppSelector } from "../redux/Store";
 import axios from "axios";
 import { CommentType, PostType } from "../type";
 import Loading from "../component/Loading";
-import { setLoading, setLogIn } from "../redux/authSlice";
+import { getUserDetail, setLoading, setLogIn } from "../redux/authSlice";
 import { useDispatch } from "react-redux";
+import { getFeedPost } from "../redux/postSlice";
 
 function HomePage() {
   const contactHandle = useMediaQuery("(min-width: 1270px)");
@@ -20,32 +21,19 @@ function HomePage() {
   const userData = useAppSelector((state) => state.auth.user);
   const isLoading = useAppSelector((state) => state.auth.loading);
   const token = useAppSelector((state) => state.auth.token);
-  const [posts, setPosts] = useState<PostType[]>([]);
+  const posts = useAppSelector((state) => state.post.post);
   const dispatch = useDispatch<AppDispatch>();
 
   useEffect(() => {
-    const fetchData = async () => {
-      dispatch(setLoading(true));
-      try {
-        if (token && token.length > 0) {
-          const { data } = await axios.get(`/posts`);
-          setPosts(data);
+    if (token && token.length > 0) {
+      dispatch(getFeedPost());
 
-          if (!userData) {
-            const { data } = await axios.get(`/users`);
-            dispatch(setLogIn(data));
-          }
-        } else {
-          window.location.replace("/");
-        }
-      } catch (error) {
-        console.error(error);
-      } finally {
-        dispatch(setLoading(false));
+      if (!userData) {
+        dispatch(getUserDetail());
       }
-    };
-
-    fetchData();
+    } else {
+      window.location.replace("/");
+    }
   }, [token, userData, dispatch]);
 
   const likePost = async (id: string) => {

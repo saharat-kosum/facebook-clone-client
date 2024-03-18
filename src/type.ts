@@ -1,9 +1,14 @@
-export interface InitialState {
+export interface AuthInitialState {
   mode: string;
   user: UserType | null;
   mockIMG: string;
   loading: boolean;
   token: string | null;
+}
+
+export interface PostInitialState {
+  post: PostType[];
+  loading: boolean;
 }
 
 export interface UserType {
